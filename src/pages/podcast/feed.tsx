@@ -1,10 +1,13 @@
 import Layout from "../../core/layouts/Layout"
 import Feed from "../../podcast/components/Feed"
+import { Suspense } from "react"
 
 const FeedPage = () => {
   return (
     <>
-      <Feed />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Feed />
+      </Suspense>
     </>
   )
 }

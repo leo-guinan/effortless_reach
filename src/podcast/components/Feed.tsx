@@ -1,146 +1,62 @@
 import { UserCircleIcon } from "@heroicons/react/20/solid"
-import { Fragment } from "react"
+import { Fragment, useEffect, useState } from "react"
+import { getAntiCSRFToken } from "@blitzjs/auth"
 
-
-const podcasts = [
-  {
-    id: 1,
-    title: "The Daily",
-    link: "https://www.nytimes.com/column/the-daily",
-    description: "The Daily is a news podcast hosted by Michael Barbaro. It is produced by The New York Times and WNYC Studios.",
-    image: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png",
-    processed: false,
-    type: "guest_interview",
-    guests: [
-      {
-        name: "Michael Barbaro",
-        link: "https://www.nytimes.com/column/the-daily",
-        imageUrl: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png"
-      }
-    ],
-    publishedDate: "2021-01-01T00:00:00.000Z",
-    tags: [
-      {
-        name: "Transcript",
-        color: "bg-rose-500",
-        href: "https://www.nytimes.com/column/the-daily"
-
-      },
-      {
-        name: "Key Points",
-        color: "bg-indigo-500",
-        href: "https://www.nytimes.com/column/the-daily"
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "The Daily",
-    link: "https://www.nytimes.com/column/the-daily",
-    description: "The Daily is a news podcast hosted by Michael Barbaro. It is produced by The New York Times and WNYC Studios.",
-    image: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png",
-    processed: false,
-    type: "solo",
-    guests: [],
-    publishedDate: "2021-01-01T00:00:00.000Z",
-    tags: [
-      {
-        name: "Transcript",
-        color: "bg-rose-500",
-        href: "https://www.nytimes.com/column/the-daily"
-
-      },
-      {
-        name: "Key Points",
-        color: "bg-indigo-500",
-        href: "https://www.nytimes.com/column/the-daily"
-      }
-    ]
-  },
-  {
-    id: 3,
-    title: "The Daily",
-    link: "https://www.nytimes.com/column/the-daily",
-    description: "The Daily is a news podcast hosted by Michael Barbaro. It is produced by The New York Times and WNYC Studios.",
-    image: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png",
-    processed: false,
-    type: "solo",
-    guests: [],
-    publishedDate: "2021-01-01T00:00:00.000Z",
-    tags: [
-      {
-        name: "Transcript",
-        color: "bg-rose-500",
-        href: "https://www.nytimes.com/column/the-daily"
-
-      },
-      {
-        name: "Key Points",
-        color: "bg-indigo-500",
-        href: "https://www.nytimes.com/column/the-daily"
-      }
-    ]
-  },
-  {
-    id: 4,
-    title: "The Daily",
-    link: "https://www.nytimes.com/column/the-daily",
-    description: "The Daily is a news podcast hosted by Michael Barbaro. It is produced by The New York Times and WNYC Studios.",
-    image: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png",
-    processed: false,
-    type: "solo",
-    guests: [],
-    publishedDate: "2021-01-01T00:00:00.000Z",
-    tags: [
-      {
-        name: "Transcript",
-        color: "bg-rose-500",
-        href: "https://www.nytimes.com/column/the-daily"
-
-      },
-      {
-        name: "Key Points",
-        color: "bg-indigo-500",
-        href: "https://www.nytimes.com/column/the-daily"
-      }
-    ]
-  },
-  {
-    id: 5,
-    title: "The Daily",
-    link: "https://www.nytimes.com/column/the-daily",
-    description: "The Daily is a news podcast hosted by Michael Barbaro. It is produced by The New York Times and WNYC Studios.",
-    image: "https://static01.nyt.com/images/misc/NYT_podcasts_logo.png",
-    processed: false,
-    type: "solo",
-    guests: [],
-    publishedDate: "2021-01-01T00:00:00.000Z",
-    tags: [
-      {
-        name: "Transcript",
-        color: "bg-rose-500",
-        href: "https://www.nytimes.com/column/the-daily"
-
-      },
-      {
-        name: "Key Points",
-        color: "bg-indigo-500",
-        href: "https://www.nytimes.com/column/the-daily"
-      }
-    ]
-  }
-]
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ")
+}
+
+interface Tag {
+  name: string
+  status: string
+}
+interface PodcastEpisode {
+  id: number
+  title: string
+  description: string
+  link: string
+  publishedDate: string
+  tags: Tag[]
 }
 
 export default function Feed() {
+
+  const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([])
+  const antiCSRFToken = getAntiCSRFToken()
+
+  const statusToColor = {
+    "In Progress": "bg-yellow-100 text-yellow-800",
+    "Not Started": "bg-gray-100 text-gray-800",
+    "Complete": "bg-green-100 text-green-800",
+  }
+
+  useEffect(() => {
+    fetch("/api/backend/podcast_episodes", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "anti-csrf": antiCSRFToken
+      }
+
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data)
+        setPodcasts(data)
+
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+
+  }, [antiCSRFToken])
+
   return (
     <div className="flow-root">
       <h1>Podcasts</h1>
       <ul role="list" className="-mb-8">
-        {podcasts.map((podcast) => (
+        {podcasts && podcasts.map((podcast) => (
           <li key={podcast.id}>
             <div className="relative pb-8">
               <div className="relative flex items-start space-x-3">
@@ -168,16 +84,10 @@ export default function Feed() {
                   {podcast.tags.map((tag) => (
                     <Fragment key={tag.name}>
                       <a
-                        href={tag.href}
-                        className="relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm"
+                        href="#"
+                        className={classNames(statusToColor[tag.status], "relative inline-flex items-center rounded-full border border-gray-300 px-3 py-0.5 text-sm")}
                       >
-                                <span className="absolute flex flex-shrink-0 items-center justify-center">
-                                  <span
-                                    className={classNames(tag.color, 'h-1.5 w-1.5 rounded-full')}
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                        <span className="ml-3.5 font-medium text-gray-900">{tag.name}</span>
+                        <span className="font-medium text-gray-900">{tag.name}</span>
                       </a>{' '}
                     </Fragment>
                   ))}

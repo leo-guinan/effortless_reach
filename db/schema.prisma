@@ -13,16 +13,17 @@ generator client {
 // --------------------------------------
 
 model User {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  name           String?
-  email          String   @unique
-  hashedPassword String?
-  role           String   @default("USER")
-
+  id                Int      @id @default(autoincrement())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  name              String?
+  email             String   @unique
+  hashedPassword    String?
+  role              String   @default("USER")
+  clientAccountId Int?
   tokens   Token[]
   sessions Session[]
+  podcasts Podcast[]
 }
 
 model Session {
@@ -55,6 +56,16 @@ model Token {
   userId Int
 
   @@unique([hashedToken, type])
+}
+
+model Podcast {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rss       String   @unique
+  feedId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 // NOTE: It's highly recommended to use an enum for the token type
